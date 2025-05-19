@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ポートフォリオ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    header p {
+      font-size: 1.2rem;
+      margin-top: 0.5rem;
+    }
+    .container {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    section {
+      margin-bottom: 3rem;
+    }
+    h2 {
+      border-bottom: 2px solid #2c3e50;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+    }
+    .profile, .contact {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .works {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    .work-item {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .work-item img {
+      max-width: 100%;
+      border-radius: 4px;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background: #2c3e50;
+      color: white;
+    }
+    .center-img {
+    display: block;
+    margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>松下</h1>
+    <p>ゲームプログラマー志望 | ポートフォリオサイト</p>
+  </header>
+  <main class="container">
+    <section class="profile">
+      <h2>プロフィール</h2>
+      <p>こんにちは。松下と申します。現在はゲームプログラマーとしての就職を目指しており、主にHTML/CSS、unityを中心に勉強しています。このサイトでは、私の制作実績やスキルを紹介します。</p>
+    </section>
+
+    <section>
+      <h2>制作実績</h2>
+      <div class="works">
+        <div class="work-item">
+	  <h3>Project 1：クリックゲーム</h3>
+          <img src="cat.jpg" alt="Project 1" class = "center-img" width = "300">
+          <a href = "https://docs.unity3d.com/ja/2018.4/ScriptReference/EventSystems.IPointerClickHandler.html" target ="_blank">
+	  ・IPointerClickHandler
+	  </a><br>
+	  <a href = "https://docs.unity3d.com/ja/2018.4/ScriptReference/EventSystems.PointerEventData.html" target ="_blank">
+	  ・PointerEventData
+	  </a><br>
+	  <a href = "https://tech.pjin.jp/blog/2021/12/23/unity-serializefield" target ="_blank">
+	  ・[SerializeField]
+	  </a><br>
+        </div>
+        <div class="work-item">
+          <img src="https://via.placeholder.com/300x200" alt="Project 2">
+          <h3>ToDoアプリ</h3>
+          <p>JavaScriptを使用して作成したタスク管理アプリ。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact">
+      <h2>お問い合わせ</h2>
+      <p>メール: arena0702256@gmail.com.com</p>
+      <p>GitHub: <a href="https://aya72t.github.io/MyWebPage/" target="_blank">https://aya72t.github.io/MyWebPage/</a></p>
+    </section>
+  </main>
+  <footer>
+    &copy; 2025 松下
+  </footer>
+</body>
+</html>
