@@ -15,6 +15,10 @@ body {
       margin: 0;
       font-size: 2.5rem;
     }
+　　header h2 {
+      margin: 0;
+      font-size: 2.0rem;
+    }
     header p {
       font-size: 1.2rem;
       margin-top: 0.5rem;
