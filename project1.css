@@ -46,10 +46,13 @@ body {
     }
     .works {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
     }
     .work-item {
+	display: flex;
+  	flex-direction: column;
+  	justify-content: space-between;
       background: white;
       padding: 1rem;
       border-radius: 8px;
