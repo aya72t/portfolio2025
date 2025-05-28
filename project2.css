@@ -48,6 +48,8 @@ body {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 2rem;
+      max-width: 100%;
+      width: 100%;
     }
     .work-item {
 　　　display: flex;
