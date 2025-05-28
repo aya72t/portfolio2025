@@ -84,12 +84,12 @@ void setup()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;while(checkButton() != CHOICE_NONE);<br>
 &nbsp;&nbsp;}<br>
 <br>
-&nbsp;&nbsp;play_winner();<br>
+&nbsp;&nbsp;play_winner();// 起動時の合図<br>
 }<br>
 <br>
 void loop()<br>
 {<br>
-&nbsp;&nbsp;attractMode();<br>
+&nbsp;&nbsp;attractMode();// ボタン待ちアニメーション<br>
 &nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_GREEN | CHOICE_BLUE | CHOICE_YELLOW);<br>
 &nbsp;&nbsp;delay(1000);<br>
 &nbsp;&nbsp;setLEDs(CHOICE_OFF);<br>
@@ -109,6 +109,8 @@ void loop()<br>
 &nbsp;&nbsp;&nbsp;&nbsp;play_loser();<br>
 &nbsp;&nbsp;}<br>
 }<br>
+<br>
+// メモリーゲーム実行（成功でtrue、失敗でfalse）
 <br>
 boolean play_memory(void)<br>
 {<br>
@@ -131,6 +133,7 @@ boolean play_memory(void)<br>
 &nbsp;&nbsp;return true;<br>
 }<br>
 <br>
+// バトルモード実行（誰かが失敗するまでループ）<br>
 boolean play_battle(void)<br>
 {<br>
 &nbsp;&nbsp;gameRound = 0;<br>
@@ -150,6 +153,7 @@ boolean play_battle(void)<br>
 &nbsp;&nbsp;return true;<br>
 }<br>
 <br>
+// 入力履歴を再生<br>
 void playMoves(void)<br>
 {<br>
 &nbsp;&nbsp;for (byte currentMove = 0; currentMove &lt; gameRound; currentMove++)<br>
@@ -159,6 +163,7 @@ void playMoves(void)<br>
 &nbsp;&nbsp;}<br>
 }<br>
 <br>
+// 新しい入力を追加<br>
 void add_to_moves(void)<br>
 {<br>
 &nbsp;&nbsp;byte newButton = random(0, 4);<br>
@@ -170,6 +175,7 @@ void add_to_moves(void)<br>
 &nbsp;&nbsp;gameBoard[gameRound++] = newButton;<br>
 }<br>
 <br>
+// 指定したLEDを点灯（ビット列で指定）<br>
 void setLEDs(byte leds)<br>
 {<br>
 &nbsp;&nbsp;digitalWrite(LED_RED,    leds &amp; CHOICE_RED    ? HIGH : LOW);<br>
@@ -178,6 +184,7 @@ void setLEDs(byte leds)<br>
 &nbsp;&nbsp;digitalWrite(LED_YELLOW, leds &amp; CHOICE_YELLOW ? HIGH : LOW);<br>
 }<br>
 <br>
+// ボタン入力待ち（タイムアウトで0）<br>
 byte wait_for_button(void)<br>
 {<br>
 &nbsp;&nbsp;long startTime = millis();<br>
@@ -195,6 +202,7 @@ byte wait_for_button(void)<br>
 &nbsp;&nbsp;return CHOICE_NONE;<br>
 }<br>
 <br>
+// ボタン状態をチェック（ビットで返す）<br>
 byte checkButton(void)<br>
 {<br>
 &nbsp;&nbsp;if (!digitalRead(BUTTON_RED))    return CHOICE_RED;<br>
@@ -204,6 +212,7 @@ byte checkButton(void)<br>
 &nbsp;&nbsp;return CHOICE_NONE;<br>
 }<br>
 <br>
+// LEDと音を鳴らす<br>
 void toner(byte which, int buzz_length_ms)<br>
 {<br>
 &nbsp;&nbsp;setLEDs(which);<br>
@@ -217,6 +226,7 @@ void toner(byte which, int buzz_length_ms)<br>
 &nbsp;&nbsp;setLEDs(CHOICE_OFF);<br>
 }<br>
 <br>
+// ブザー音生成<br>
 void buzz_sound(int buzz_length_ms, int buzz_delay_us)<br>
 {<br>
 &nbsp;&nbsp;long buzz_length_us = buzz_length_ms * 1000L;<br>
@@ -232,6 +242,7 @@ void buzz_sound(int buzz_length_ms, int buzz_delay_us)<br>
 &nbsp;&nbsp;}<br>
 }<br>
 <br>
+// 勝利時の演出<br>
 void play_winner(void)<br>
 {<br>
 &nbsp;&nbsp;setLEDs(CHOICE_GREEN | CHOICE_BLUE); winner_sound();<br>
@@ -240,6 +251,7 @@ void play_winner(void)<br>
 &nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_YELLOW); winner_sound();<br>
 }<br>
 <br>
+// 勝利時の音<br>
 void winner_sound(void)<br>
 {<br>
 &nbsp;&nbsp;for (byte x = 250; x &gt; 70; x--)<br>
@@ -256,6 +268,7 @@ void winner_sound(void)<br>
 &nbsp;&nbsp;}<br>
 }<br>
 <br>
+// 敗北時の演出<br>
 void play_loser(void)<br>
 {<br>
 &nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_GREEN);   buzz_sound(255, 1500);<br>
@@ -264,6 +277,7 @@ void play_loser(void)<br>
 &nbsp;&nbsp;setLEDs(CHOICE_BLUE | CHOICE_YELLOW); buzz_sound(255, 1500);<br>
 }<br>
 <br>
+// ボタン入力待ちのアニメーション<br>
 void attractMode(void)<br>
 {<br>
 &nbsp;&nbsp;while(1)<br>
