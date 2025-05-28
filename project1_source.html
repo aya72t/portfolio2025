@@ -18,320 +18,282 @@
     <section class="source">
       <h2>ソースコード</h2>
 	  <p>
-// 選択肢（ボタン・LED）の定義
-#define CHOICE_OFF      0 
-#define CHOICE_NONE     0 
-#define CHOICE_RED      (1 << 0)
-#define CHOICE_GREEN    (1 << 1)
-#define CHOICE_BLUE     (1 << 2)
-#define CHOICE_YELLOW   (1 << 3)
+<pre><code>
+// 選択肢（ボタン・LED）の定義<br>
+#define CHOICE_OFF      0 <br>
+#define CHOICE_NONE     0 <br>
+#define CHOICE_RED      (1 &lt;&lt; 0)<br>
+#define CHOICE_GREEN    (1 &lt;&lt; 1)<br>
+#define CHOICE_BLUE     (1 &lt;&lt; 2)<br>
+#define CHOICE_YELLOW   (1 &lt;&lt; 3)<br>
+<br>
+// LEDのピン番号<br>
+#define LED_RED     10<br>
+#define LED_GREEN   3<br>
+#define LED_BLUE    13<br>
+#define LED_YELLOW  5<br>
+<br>
+// ボタンのピン番号<br>
+#define BUTTON_RED    9<br>
+#define BUTTON_GREEN  2<br>
+#define BUTTON_BLUE   12<br>
+#define BUTTON_YELLOW 6<br>
+<br>
+// ブザーのピン番号<br>
+#define BUZZER1  4<br>
+#define BUZZER2  7<br>
+<br>
+// ゲーム設定<br>
+#define ROUNDS_TO_WIN      13     // 勝利までのラウンド数<br>
+#define ENTRY_TIME_LIMIT   3000   // 入力制限時間（ms）<br>
+<br>
+// ゲームモード<br>
+#define MODE_MEMORY  0<br>
+#define MODE_BATTLE  1<br>
+#define MODE_BEEGEES 2<br>
+<br>
+byte gameMode = MODE_MEMORY;<br>
+byte gameBoard[32]; // シーケンス保存用配列<br>
+byte gameRound = 0; // 現在のラウンド数<br>
+<br>
+void setup()<br>
+{<br>
+&nbsp;&nbsp;pinMode(BUTTON_RED, INPUT_PULLUP);<br>
+&nbsp;&nbsp;pinMode(BUTTON_GREEN, INPUT_PULLUP);<br>
+&nbsp;&nbsp;pinMode(BUTTON_BLUE, INPUT_PULLUP);<br>
+&nbsp;&nbsp;pinMode(BUTTON_YELLOW, INPUT_PULLUP);<br>
+<br>
+&nbsp;&nbsp;pinMode(LED_RED, OUTPUT);<br>
+&nbsp;&nbsp;pinMode(LED_GREEN, OUTPUT);<br>
+&nbsp;&nbsp;pinMode(LED_BLUE, OUTPUT);<br>
+&nbsp;&nbsp;pinMode(LED_YELLOW, OUTPUT);<br>
+<br>
+&nbsp;&nbsp;pinMode(BUZZER1, OUTPUT);<br>
+&nbsp;&nbsp;pinMode(BUZZER2, OUTPUT);<br>
+<br>
+&nbsp;&nbsp;gameMode = MODE_MEMORY;<br>
+<br>
+&nbsp;&nbsp;if (checkButton() == CHOICE_YELLOW) play_beegees();<br>
+<br>
+&nbsp;&nbsp;if (checkButton() == CHOICE_GREEN)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gameMode = MODE_BATTLE;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;setLEDs(CHOICE_GREEN);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toner(CHOICE_GREEN, 150);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_BLUE | CHOICE_YELLOW);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;while(checkButton() != CHOICE_NONE);<br>
+&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;play_winner();<br>
+}<br>
+<br>
+void loop()<br>
+{<br>
+&nbsp;&nbsp;attractMode();<br>
+&nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_GREEN | CHOICE_BLUE | CHOICE_YELLOW);<br>
+&nbsp;&nbsp;delay(1000);<br>
+&nbsp;&nbsp;setLEDs(CHOICE_OFF);<br>
+&nbsp;&nbsp;delay(250);<br>
+<br>
+&nbsp;&nbsp;if (gameMode == MODE_MEMORY)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if (play_memory())<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;play_winner();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;play_loser();<br>
+&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;if (gameMode == MODE_BATTLE)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;play_battle();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;play_loser();<br>
+&nbsp;&nbsp;}<br>
+}<br>
+<br>
+boolean play_memory(void)<br>
+{<br>
+&nbsp;&nbsp;randomSeed(millis());<br>
+&nbsp;&nbsp;gameRound = 0;<br>
+<br>
+&nbsp;&nbsp;while (gameRound &lt; ROUNDS_TO_WIN)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;add_to_moves();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;playMoves();<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for (byte currentMove = 0; currentMove &lt; gameRound; currentMove++)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;byte choice = wait_for_button();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (choice == 0) return false;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (choice != gameBoard[currentMove]) return false;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;delay(1000);<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;return true;<br>
+}<br>
+<br>
+boolean play_battle(void)<br>
+{<br>
+&nbsp;&nbsp;gameRound = 0;<br>
+&nbsp;&nbsp;while (1)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;byte newButton = wait_for_button();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gameBoard[gameRound++] = newButton;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for (byte currentMove = 0; currentMove &lt; gameRound; currentMove++)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;byte choice = wait_for_button();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (choice == 0) return false;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (choice != gameBoard[currentMove]) return false;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;delay(100);<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;return true;<br>
+}<br>
+<br>
+void playMoves(void)<br>
+{<br>
+&nbsp;&nbsp;for (byte currentMove = 0; currentMove &lt; gameRound; currentMove++)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toner(gameBoard[currentMove], 150);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;delay(150);<br>
+&nbsp;&nbsp;}<br>
+}<br>
+<br>
+void add_to_moves(void)<br>
+{<br>
+&nbsp;&nbsp;byte newButton = random(0, 4);<br>
+&nbsp;&nbsp;if (newButton == 0) newButton = CHOICE_RED;<br>
+&nbsp;&nbsp;else if (newButton == 1) newButton = CHOICE_GREEN;<br>
+&nbsp;&nbsp;else if (newButton == 2) newButton = CHOICE_BLUE;<br>
+&nbsp;&nbsp;else if (newButton == 3) newButton = CHOICE_YELLOW;<br>
+<br>
+&nbsp;&nbsp;gameBoard[gameRound++] = newButton;<br>
+}<br>
+<br>
+void setLEDs(byte leds)<br>
+{<br>
+&nbsp;&nbsp;digitalWrite(LED_RED,    leds &amp; CHOICE_RED    ? HIGH : LOW);<br>
+&nbsp;&nbsp;digitalWrite(LED_GREEN,  leds &amp; CHOICE_GREEN  ? HIGH : LOW);<br>
+&nbsp;&nbsp;digitalWrite(LED_BLUE,   leds &amp; CHOICE_BLUE   ? HIGH : LOW);<br>
+&nbsp;&nbsp;digitalWrite(LED_YELLOW, leds &amp; CHOICE_YELLOW ? HIGH : LOW);<br>
+}<br>
+<br>
+byte wait_for_button(void)<br>
+{<br>
+&nbsp;&nbsp;long startTime = millis();<br>
+&nbsp;&nbsp;while ((millis() - startTime) &lt; ENTRY_TIME_LIMIT)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;byte button = checkButton();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if (button != CHOICE_NONE)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;toner(button, 150);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while(checkButton() != CHOICE_NONE);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delay(10);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return button;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;return CHOICE_NONE;<br>
+}<br>
+<br>
+byte checkButton(void)<br>
+{<br>
+&nbsp;&nbsp;if (!digitalRead(BUTTON_RED))    return CHOICE_RED;<br>
+&nbsp;&nbsp;if (!digitalRead(BUTTON_GREEN))  return CHOICE_GREEN;<br>
+&nbsp;&nbsp;if (!digitalRead(BUTTON_BLUE))   return CHOICE_BLUE;<br>
+&nbsp;&nbsp;if (!digitalRead(BUTTON_YELLOW)) return CHOICE_YELLOW;<br>
+&nbsp;&nbsp;return CHOICE_NONE;<br>
+}<br>
+<br>
+void toner(byte which, int buzz_length_ms)<br>
+{<br>
+&nbsp;&nbsp;setLEDs(which);<br>
+&nbsp;&nbsp;switch(which)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;case CHOICE_RED:    buzz_sound(buzz_length_ms, 1136); break;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;case CHOICE_GREEN:  buzz_sound(buzz_length_ms, 568);  break;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;case CHOICE_BLUE:   buzz_sound(buzz_length_ms, 851);  break;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;case CHOICE_YELLOW: buzz_sound(buzz_length_ms, 638);  break;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;setLEDs(CHOICE_OFF);<br>
+}<br>
+<br>
+void buzz_sound(int buzz_length_ms, int buzz_delay_us)<br>
+{<br>
+&nbsp;&nbsp;long buzz_length_us = buzz_length_ms * 1000L;<br>
+&nbsp;&nbsp;while (buzz_length_us &gt; buzz_delay_us * 2)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;buzz_length_us -= buzz_delay_us * 2;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(BUZZER1, LOW);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(BUZZER2, HIGH);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;delayMicroseconds(buzz_delay_us);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(BUZZER1, HIGH);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(BUZZER2, LOW);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;delayMicroseconds(buzz_delay_us);<br>
+&nbsp;&nbsp;}<br>
+}<br>
+<br>
+void play_winner(void)<br>
+{<br>
+&nbsp;&nbsp;setLEDs(CHOICE_GREEN | CHOICE_BLUE); winner_sound();<br>
+&nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_YELLOW); winner_sound();<br>
+&nbsp;&nbsp;setLEDs(CHOICE_GREEN | CHOICE_BLUE); winner_sound();<br>
+&nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_YELLOW); winner_sound();<br>
+}<br>
+<br>
+void winner_sound(void)<br>
+{<br>
+&nbsp;&nbsp;for (byte x = 250; x &gt; 70; x--)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for (byte y = 0; y &lt; 3; y++)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(BUZZER2, HIGH);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(BUZZER1, LOW);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delayMicroseconds(x);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(BUZZER2, LOW);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(BUZZER1, HIGH);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delayMicroseconds(x);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+}<br>
+<br>
+void play_loser(void)<br>
+{<br>
+&nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_GREEN);   buzz_sound(255, 1500);<br>
+&nbsp;&nbsp;setLEDs(CHOICE_BLUE | CHOICE_YELLOW); buzz_sound(255, 1500);<br>
+&nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_GREEN);   buzz_sound(255, 1500);<br>
+&nbsp;&nbsp;setLEDs(CHOICE_BLUE | CHOICE_YELLOW); buzz_sound(255, 1500);<br>
+}<br>
+<br>
+void attractMode(void)<br>
+{<br>
+&nbsp;&nbsp;while(1)<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;setLEDs(CHOICE_RED);    delay(100); if (checkButton()) return;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;setLEDs(CHOICE_BLUE);   delay(100); if (checkButton()) return;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;setLEDs(CHOICE_GREEN);  delay(100); if (checkButton()) return;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;setLEDs(CHOICE_YELLOW); delay(100); if (checkButton()) return;<br>
+&nbsp;&nbsp;}<br>
+}<br>
+<br>
+void play_beegees()<br>
+{<br>
+&nbsp;&nbsp;setLEDs(CHOICE_YELLOW);<br>
+&nbsp;&nbsp;toner(CHOICE_YELLOW, 150);<br>
+&nbsp;&nbsp;setLEDs(CHOICE_RED | CHOICE_GREEN | CHOICE_BLUE);<br>
+&nbsp;&nbsp;while(checkButton() != CHOICE_NONE);<br>
+&nbsp;&nbsp;setLEDs(CHOICE_NONE);<br>
+&nbsp;&nbsp;delay(1000);<br>
+&nbsp;&nbsp;digitalWrite(BUZZER1, LOW);<br>
+}<br>
+<br>
+void changeLED(void)<br>
+{<br>
+&nbsp;&nbsp;setLEDs(1 &lt;&lt; LEDnumber);<br>
+&nbsp;&nbsp;LEDnumber++;<br>
+&nbsp;&nbsp;if (LEDnumber &gt; 3) LEDnumber = 0;<br>
+}<br>
+</code></pre>
 
-// LEDのピン番号
-#define LED_RED     10
-#define LED_GREEN   3
-#define LED_BLUE    13
-#define LED_YELLOW  5
-
-// ボタンのピン番号
-#define BUTTON_RED    9
-#define BUTTON_GREEN  2
-#define BUTTON_BLUE   12
-#define BUTTON_YELLOW 6
-
-// ブザーのピン番号
-#define BUZZER1  4
-#define BUZZER2  7
-
-// ゲーム設定
-#define ROUNDS_TO_WIN      13     // 勝利までのラウンド数
-#define ENTRY_TIME_LIMIT   3000   // 入力制限時間（ms）
-
-// ゲームモード
-#define MODE_MEMORY  0
-#define MODE_BATTLE  1
-#define MODE_BEEGEES 2
-
-byte gameMode = MODE_MEMORY;
-byte gameBoard[32]; // シーケンス保存用配列
-byte gameRound = 0; // 現在のラウンド数
-
-void setup()
-{
-  // ボタンとLEDの初期化
-  pinMode(BUTTON_RED, INPUT_PULLUP);
-  pinMode(BUTTON_GREEN, INPUT_PULLUP);
-  pinMode(BUTTON_BLUE, INPUT_PULLUP);
-  pinMode(BUTTON_YELLOW, INPUT_PULLUP);
-
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_BLUE, OUTPUT);
-  pinMode(LED_YELLOW, OUTPUT);
-
-  pinMode(BUZZER1, OUTPUT);
-  pinMode(BUZZER2, OUTPUT);
-
-  gameMode = MODE_MEMORY;
-
-  // YELLOWボタンが押されていたらビージーズモード起動
-  if (checkButton() == CHOICE_YELLOW) play_beegees();
-
-  // GREENボタンが押されていたらバトルモードへ
-  if (checkButton() == CHOICE_GREEN)
-  {
-    gameMode = MODE_BATTLE;
-
-    setLEDs(CHOICE_GREEN);
-    toner(CHOICE_GREEN, 150);
-
-    setLEDs(CHOICE_RED | CHOICE_BLUE | CHOICE_YELLOW);
-
-    while(checkButton() != CHOICE_NONE); // ボタンが離されるまで待機
-  }
-
-  play_winner(); // 起動音
-}
-
-void loop()
-{
-  attractMode(); // ボタン待機中のアニメーション
-
-  setLEDs(CHOICE_RED | CHOICE_GREEN | CHOICE_BLUE | CHOICE_YELLOW);
-  delay(1000);
-  setLEDs(CHOICE_OFF);
-  delay(250);
-
-  if (gameMode == MODE_MEMORY)
-  {
-    if (play_memory())
-      play_winner(); // 勝利
-    else
-      play_loser();  // 敗北
-  }
-
-  if (gameMode == MODE_BATTLE)
-  {
-    play_battle();  // バトルモード実行
-    play_loser();   // 負けたら敗北演出
-  }
-}
-
-// メモリーモード：記憶ゲーム
-boolean play_memory(void)
-{
-  randomSeed(millis());
-  gameRound = 0;
-
-  while (gameRound < ROUNDS_TO_WIN) 
-  {
-    add_to_moves();  // 新しい手を追加
-    playMoves();     // シーケンス再生
-
-    // プレイヤーが再入力
-    for (byte currentMove = 0 ; currentMove < gameRound ; currentMove++)
-    {
-      byte choice = wait_for_button();
-
-      if (choice == 0) return false;
-      if (choice != gameBoard[currentMove]) return false;
-    }
-
-    delay(1000);
-  }
-
-  return true;
-}
-
-// バトルモード：交互に入力を追加
-boolean play_battle(void)
-{
-  gameRound = 0;
-
-  while (1)
-  {
-    byte newButton = wait_for_button();
-    gameBoard[gameRound++] = newButton;
-
-    for (byte currentMove = 0 ; currentMove < gameRound ; currentMove++)
-    {
-      byte choice = wait_for_button();
-      if (choice == 0) return false;
-      if (choice != gameBoard[currentMove]) return false;
-    }
-
-    delay(100);
-  }
-
-  return true;
-}
-
-// 現在のシーケンスを再生
-void playMoves(void)
-{
-  for (byte currentMove = 0 ; currentMove < gameRound ; currentMove++) 
-  {
-    toner(gameBoard[currentMove], 150);
-    delay(150);
-  }
-}
-
-// ランダムに1手追加
-void add_to_moves(void)
-{
-  byte newButton = random(0, 4);
-
-  if(newButton == 0) newButton = CHOICE_RED;
-  else if(newButton == 1) newButton = CHOICE_GREEN;
-  else if(newButton == 2) newButton = CHOICE_BLUE;
-  else if(newButton == 3) newButton = CHOICE_YELLOW;
-
-  gameBoard[gameRound++] = newButton;
-}
-
-// LEDの表示
-void setLEDs(byte leds)
-{
-  digitalWrite(LED_RED,    leds & CHOICE_RED    ? HIGH : LOW);
-  digitalWrite(LED_GREEN,  leds & CHOICE_GREEN  ? HIGH : LOW);
-  digitalWrite(LED_BLUE,   leds & CHOICE_BLUE   ? HIGH : LOW);
-  digitalWrite(LED_YELLOW, leds & CHOICE_YELLOW ? HIGH : LOW);
-}
-
-// ボタン入力を待つ（制限時間あり）
-byte wait_for_button(void)
-{
-  long startTime = millis();
-
-  while ((millis() - startTime) < ENTRY_TIME_LIMIT)
-  {
-    byte button = checkButton();
-
-    if (button != CHOICE_NONE)
-    { 
-      toner(button, 150);
-      while(checkButton() != CHOICE_NONE);
-      delay(10);
-      return button;
-    }
-  }
-
-  return CHOICE_NONE;
-}
-
-// 押されたボタンを返す
-byte checkButton(void)
-{
-  if (!digitalRead(BUTTON_RED))    return CHOICE_RED;
-  if (!digitalRead(BUTTON_GREEN))  return CHOICE_GREEN;
-  if (!digitalRead(BUTTON_BLUE))   return CHOICE_BLUE;
-  if (!digitalRead(BUTTON_YELLOW)) return CHOICE_YELLOW;
-
-  return CHOICE_NONE;
-}
-
-// 対応するLEDと音を鳴らす
-void toner(byte which, int buzz_length_ms)
-{
-  setLEDs(which);
-
-  switch(which) 
-  {
-    case CHOICE_RED:    buzz_sound(buzz_length_ms, 1136); break;
-    case CHOICE_GREEN:  buzz_sound(buzz_length_ms, 568);  break;
-    case CHOICE_BLUE:   buzz_sound(buzz_length_ms, 851);  break;
-    case CHOICE_YELLOW: buzz_sound(buzz_length_ms, 638);  break;
-  }
-
-  setLEDs(CHOICE_OFF);
-}
-
-// ブザー音再生
-void buzz_sound(int buzz_length_ms, int buzz_delay_us)
-{
-  long buzz_length_us = buzz_length_ms * 1000L;
-
-  while (buzz_length_us > buzz_delay_us * 2)
-  {
-    buzz_length_us -= buzz_delay_us * 2;
-
-    digitalWrite(BUZZER1, LOW);
-    digitalWrite(BUZZER2, HIGH);
-    delayMicroseconds(buzz_delay_us);
-
-    digitalWrite(BUZZER1, HIGH);
-    digitalWrite(BUZZER2, LOW);
-    delayMicroseconds(buzz_delay_us);
-  }
-}
-
-// 勝利時の演出
-void play_winner(void)
-{
-  setLEDs(CHOICE_GREEN | CHOICE_BLUE); winner_sound();
-  setLEDs(CHOICE_RED | CHOICE_YELLOW); winner_sound();
-  setLEDs(CHOICE_GREEN | CHOICE_BLUE); winner_sound();
-  setLEDs(CHOICE_RED | CHOICE_YELLOW); winner_sound();
-}
-
-// 勝利音
-void winner_sound(void)
-{
-  for (byte x = 250 ; x > 70 ; x--)
-  {
-    for (byte y = 0 ; y < 3 ; y++)
-    {
-      digitalWrite(BUZZER2, HIGH);
-      digitalWrite(BUZZER1, LOW);
-      delayMicroseconds(x);
-      digitalWrite(BUZZER2, LOW);
-      digitalWrite(BUZZER1, HIGH);
-      delayMicroseconds(x);
-    }
-  }
-}
-
-// 敗北時の演出
-void play_loser(void)
-{
-  setLEDs(CHOICE_RED | CHOICE_GREEN);   buzz_sound(255, 1500);
-  setLEDs(CHOICE_BLUE | CHOICE_YELLOW); buzz_sound(255, 1500);
-  setLEDs(CHOICE_RED | CHOICE_GREEN);   buzz_sound(255, 1500);
-  setLEDs(CHOICE_BLUE | CHOICE_YELLOW); buzz_sound(255, 1500);
-}
-
-// デモアニメーション（ボタン入力待ち）
-void attractMode(void)
-{
-  while(1) 
-  {
-    setLEDs(CHOICE_RED);    delay(100); if (checkButton()) return;
-    setLEDs(CHOICE_BLUE);   delay(100); if (checkButton()) return;
-    setLEDs(CHOICE_GREEN);  delay(100); if (checkButton()) return;
-    setLEDs(CHOICE_YELLOW); delay(100); if (checkButton()) return;
-  }
-}
-
-// ビージーズモード（YELLOW長押し起動）
-void play_beegees()
-{
-  setLEDs(CHOICE_YELLOW);
-  toner(CHOICE_YELLOW, 150);
-
-  setLEDs(CHOICE_RED | CHOICE_GREEN | CHOICE_BLUE);
-  while(checkButton() != CHOICE_NONE);
-  setLEDs(CHOICE_NONE);
-
-  delay(1000);
-  digitalWrite(BUZZER1, LOW);
-}
-
-// LEDを順に切り替える
-void changeLED(void)
-{
-  setLEDs(1 << LEDnumber);
-  LEDnumber++;
-  if(LEDnumber > 3) LEDnumber = 0;
-}
     </p>
     </section>
 
