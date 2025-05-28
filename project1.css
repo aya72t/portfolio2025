@@ -24,7 +24,7 @@ body {
       font-size: 1.2rem;
       margin-top: 0.5rem;
     }
-    .profile,.contact {
+    .profile,.contact,.source {
       background: white;
       padding: 1rem;
       border-radius: 8px;
