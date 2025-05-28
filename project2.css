@@ -48,8 +48,6 @@ body {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 2rem;
-      max-width: 100%;
-      width: 100%;
     }
     .work-item {
 　　　display: flex;
@@ -60,7 +58,8 @@ body {
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       max-width: 100%;
-      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
     }
     
     .video-container {
