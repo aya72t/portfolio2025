@@ -50,14 +50,18 @@ body {
       gap: 2rem;
     }
     .work-item {
-　　　display: flex;
-  　　flex-direction: column;
-  　　justify-content: space-between;
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      max-width: 100%;
+　　　.video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        max-width: 100%;
+        background: #000;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
     }
     
     .video-container {
